@@ -1,15 +1,12 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/retouche"
-        android:icon="@drawable/ic_launcher_background"
-        android:title="Retouche"
-        app:showAsAction="never"></item>
     <item android:id="@+id/prendre_photo"
         android:icon="@drawable/ic_launcher_background"
         android:title="Prendre une photo"
         app:showAsAction="never"></item>
-    <item android:id="@+id/partager"
+    <item android:id="@+id/choisir_photo"
         android:icon="@drawable/ic_launcher_background"
-        android:title="Partager"
+        android:title="Choisir une photo à retoucher"
         app:showAsAction="never"></item>
+
 </menu>

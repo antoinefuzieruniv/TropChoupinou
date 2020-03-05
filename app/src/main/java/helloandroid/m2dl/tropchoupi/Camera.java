@@ -77,10 +77,18 @@ public class Camera extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_camera2);
-        this.textureView = (TextureView) findViewById(R.id.imageView);
+        this.textureView = findViewById(R.id.textureView);
         createImageGallery();
         startBackgroundThread();
         this.textureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        findViewById(R.id.goback).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
         createImageGallery();
     }
 
@@ -342,6 +350,18 @@ public class Camera extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        startBackgroundThread();
+        if (textureView.isAvailable()) {
+            openCamera(textureView.getWidth(), textureView.getHeight());
+        } else {
+            textureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
+
     private void startBackgroundThread() {
         mBackgroundThread = new HandlerThread("CameraBackground");
         mBackgroundThread.start();
@@ -463,7 +483,6 @@ public class Camera extends AppCompatActivity {
         try {
             File photo = createImageFile(galleryFolder);
             outputPhoto = new FileOutputStream(photo);
-            Bitmap bitmap = textureView.getBitmap();
             textureView.getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, outputPhoto);
 
             //Pop intent

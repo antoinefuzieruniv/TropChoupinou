@@ -6,26 +6,43 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
+import android.view.View;
 
-import java.io.File;
-import java.io.FileInputStream;
 
 public class MainActivity extends AppCompatActivity {
+
+    private int GALLERY_REQUEST_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        findViewById(R.id.take_photo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Camera.class);
+                startActivityForResult(intent, 200);
+            }
+        });
+
+        findViewById(R.id.choose_photo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickFromGallery();
+            }
+        });
     }
 
     @Override
@@ -37,14 +54,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.retouche:
-                return true;
             case R.id.prendre_photo:
                 Intent intent = new Intent(this, Camera.class);
                 startActivityForResult(intent, 200);
                 //startActivity(intent);
                 break;
-            case R.id.partager:
+            case R.id.choisir_photo:
+                pickFromGallery();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -53,23 +69,57 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (200) : {
-                if (resultCode == MainActivity.RESULT_OK) {
-                    assert data != null;
-                    String imageFile = data.getStringExtra("image");
-
-
-                    File sd = Environment.getExternalStorageDirectory();
-                    assert imageFile != null;
-                    File image = new File(imageFile);
-                    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                    Bitmap bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(),bmOptions);
-                    ImageView imageView = (ImageView)findViewById(R.id.imageView);
-                    imageView.setImageBitmap(bitmap);
+        switch (requestCode) {
+            case 200:
+                Uri selectedImage = null;
+                if (data != null) {
+                    selectedImage = data.getData();
+                }else{
+                    return;
                 }
+                String path = getRealPathFromURI_API19(this,selectedImage);
+
+                Intent in1 = new Intent(this, Retouche.class);
+                in1.putExtra("image", path);
+                startActivity(in1);
+
                 break;
-            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + requestCode);
         }
     }
+
+    public static String getRealPathFromURI_API19(Context context, Uri uri){
+        String filePath = "";
+        String wholeID = DocumentsContract.getDocumentId(uri);
+
+        // Split at colon, use second item in the array
+        String id = wholeID.split(":")[1];
+
+        String[] column = { MediaStore.Images.Media.DATA };
+
+        // where id is equal to
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                column, sel, new String[]{ id }, null);
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+        cursor.close();
+        return filePath;
+    }
+
+
+    private void pickFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), GALLERY_REQUEST_CODE);
+    }
+
+
 }
