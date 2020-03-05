@@ -18,7 +18,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.Image;
 import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Environment;
@@ -77,13 +76,12 @@ public class Camera extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         setContentView(R.layout.activity_camera2);
-        this.textureView = (TextureView)findViewById(R.id.textureView);
+        this.textureView = (TextureView) findViewById(R.id.imageView);
         createImageGallery();
         startBackgroundThread();
         this.textureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        createImageGallery();
     }
 
     private final TextureView.SurfaceTextureListener mSurfaceTextureListener
@@ -360,6 +358,7 @@ public class Camera extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
                                           int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
 
@@ -392,6 +391,7 @@ public class Camera extends AppCompatActivity {
             return choices[0];
         }
     }
+
     private void configureTransform(int viewWidth, int viewHeight) {
         if (null == textureView || null == mPreviewSize) {
             return;
@@ -425,6 +425,7 @@ public class Camera extends AppCompatActivity {
                     (long) rhs.getWidth() * rhs.getHeight());
         }
     }
+
     /**
      * Shows a {@link Toast} on the UI thread.
      *
@@ -449,6 +450,7 @@ public class Camera extends AppCompatActivity {
             }
         }
     }
+
     private File createImageFile(File galleryFolder) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "image_" + timeStamp + "_";
@@ -456,11 +458,20 @@ public class Camera extends AppCompatActivity {
     }
 
 
-   public void onTakePhotoButtonClicked(View view) {
+    public void onTakePhotoButtonClicked(View view) {
         FileOutputStream outputPhoto = null;
         try {
-            outputPhoto = new FileOutputStream(createImageFile(galleryFolder));
-            textureView.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
+            File photo = createImageFile(galleryFolder);
+            outputPhoto = new FileOutputStream(photo);
+            Bitmap bitmap = textureView.getBitmap();
+            textureView.getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, outputPhoto);
+
+            //Pop intent
+            Intent in1 = new Intent(this, Retouche.class);
+            in1.putExtra("image", photo.getAbsolutePath());
+            startActivity(in1);
+            //setResult(MainActivity.RESULT_OK, in1);
+            //finish();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

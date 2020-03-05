@@ -7,7 +7,7 @@
     tools:context=".Camera">
 
     <TextureView
-        android:id="@+id/textureView"
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -18,21 +18,25 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="108dp"
-            android:layout_height="102dp"
-            android:background="#00FFFFFF"
-            android:onClick="onTakePhotoButtonClicked"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/photo_shutter" />
-
-    </FrameLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="120dp"
+        android:layout_height="95dp"
+        android:layout_marginBottom="40dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="onTakePhotoButtonClicked"
+        app:backgroundTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
