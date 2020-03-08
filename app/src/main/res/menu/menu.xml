@@ -9,4 +9,5 @@
         android:title="Choisir une photo à retoucher"
         app:showAsAction="never"></item>
 
+
 </menu>

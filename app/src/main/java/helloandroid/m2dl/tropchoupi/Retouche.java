@@ -9,71 +9,66 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 
-public class Retouche extends AppCompatActivity {
+public class Retouche extends AppCompatActivity implements SensorEventListener {
     ImageView retoucheImageView;
-    ImageView monochromeButton;
+    ImageView useLightSensor;
     Bitmap bitmap;
-    SeekBar seekBar;
+    SensorManager sensorManager;
+    private Sensor accelerometerSensor;
+    private Sensor lightSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_retouche);
-        this.monochromeButton = findViewById(R.id.monochromeButton);
+        this.useLightSensor = findViewById(R.id.useLightSensor);
         this.retoucheImageView = findViewById(R.id.retoucheImageView);
-        this.seekBar = findViewById(R.id.saturation);
 
-        this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                changeSaturation(progress);
-            }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        monochromeButton.setOnClickListener(new View.OnClickListener() {
+        useLightSensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeSaturation(0);
+                sensorManager.unregisterListener(Retouche.this);
+                sensorManager.registerListener(Retouche.this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
             }
         });
 
-        findViewById(R.id.change_to_blue).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.useAccelerometer).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeColorFilter(Color.BLUE);
+                sensorManager.unregisterListener(Retouche.this);
+                sensorManager.registerListener(Retouche.this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
             }
         });
 
-        findViewById(R.id.change_to_red).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeColorFilter(Color.RED);
-            }
-        });
+
         getImageFromCameraCapure();
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
     }
 
-    private void changeColorFilter(int color){
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
+
+    private void changeColorFilter(int color) {
         Bitmap bmpMonochrome = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmpMonochrome);
         ColorMatrix ma = new ColorMatrix();
@@ -96,20 +91,44 @@ public class Retouche extends AppCompatActivity {
     }
 
     private void getImageFromCameraCapure() {
-            String imageFile = getIntent().getStringExtra("image");
-            File image = new File(imageFile);
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(), bmOptions);
-            ImageView imageView = findViewById(R.id.retoucheImageView);
-            imageView.setImageBitmap(bitmap);
-
+        String imageFile = getIntent().getStringExtra("image");
+        File image = new File(imageFile);
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bitmap = BitmapFactory.decodeFile(image.getAbsolutePath(), bmOptions);
+        ImageView imageView = findViewById(R.id.retoucheImageView);
+        imageView.setImageBitmap(bitmap);
     }
-
 
     public void reset(View view) {
+        sensorManager.unregisterListener(Retouche.this);
         retoucheImageView.setImageBitmap(bitmap);
-        this.seekBar.setProgress(1);
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_ACCELEROMETER:
+                float x = event.values[0];
+                float y = event.values[1];
+                float z = event.values[2];
+                System.out.println(z);
+                if (z > 0 && z < 5) {
+                    changeColorFilter(Color.RED);
+                } else if (z >= 5 && z < 8) {
+                    changeColorFilter(Color.BLUE);
+                }else{
+                    changeColorFilter(Color.MAGENTA);
+                }
+                break;
+            case Sensor.TYPE_LIGHT:
+                changeSaturation(event.values[0]);
+                break;
+            default:
+                break;
+        }
+    }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 }
