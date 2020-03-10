@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/retoucheLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Retouche">
@@ -25,54 +26,54 @@
 
             <ImageView
                 android:id="@+id/useLightSensor"
-                android:layout_width="108dp"
-                android:layout_height="108dp"
+                android:layout_width="111dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:srcCompat="@android:color/white" />
 
             <ImageView
                 android:id="@+id/useAccelerometer"
-                android:layout_width="108dp"
-                android:layout_height="108dp"
+                android:layout_width="121dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:srcCompat="@android:color/holo_blue_dark" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <ImageView
-        android:id="@+id/retoucheImageView"
-        android:layout_width="415dp"
-        android:layout_height="617dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayoutImageView"
+        android:layout_width="match_parent"
+        android:layout_height="614dp"
         app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/resetButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="28dp"
-        android:clickable="true"
-        android:onClick="reset"
-        android:src="@drawable/ic_action_name"
-        app:backgroundTint="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/retoucheImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
-        android:clickable="true"
-        app:backgroundTint="@android:color/white"
-        app:layout_constraintEnd_toStartOf="@+id/resetButton"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_save" />
+        <ImageView
+            android:id="@+id/toDrag"
+            android:layout_width="121dp"
+            android:layout_height="121dp"
+            android:layout_marginStart="72dp"
+            android:layout_marginTop="232dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/retoucheImageView"
+            app:layout_constraintHorizontal_bias="0.422"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/retoucheImageView"
+            app:layout_constraintVertical_bias="0.057"
+            app:srcCompat="@drawable/ic_gallery" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

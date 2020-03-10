@@ -36,12 +36,7 @@ public class MainActivity extends AppCompatActivity  {
                 startActivityForResult(intent, 200);
             }
         });
-        findViewById(R.id.choose_photo).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickFromGallery();
-            }
-        });
+
     }
 
 
@@ -93,7 +88,7 @@ public class MainActivity extends AppCompatActivity  {
     }
 
 
-    private void pickFromGallery() {
+    public void pickFromGallery(View v) {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);

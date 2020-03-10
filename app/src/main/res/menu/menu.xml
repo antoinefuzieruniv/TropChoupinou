@@ -1,13 +1,21 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/prendre_photo"
-        android:icon="@drawable/ic_launcher_background"
-        android:title="Prendre une photo"
-        app:showAsAction="never"></item>
-    <item android:id="@+id/choisir_photo"
-        android:icon="@drawable/ic_launcher_background"
-        android:title="Choisir une photo à retoucher"
-        app:showAsAction="never"></item>
+    <item
+        android:id="@+id/choosePhotoMenuItem"
+        android:enabled="true"
+        android:title="Choisir une photo de la galerie"
+        android:visible="true"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sauvegarder"
+        android:title="Sauvegarder"
+        app:showAsAction="always"></item>
+    <item
+        android:id="@+id/reset"
+        android:enabled="true"
+        android:title="Reset"
+        android:visible="true"
+        app:showAsAction="always"></item>
 
 
 </menu>
