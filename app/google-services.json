@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "401599480667",
+    "firebase_url": "https://tropchoupinou.firebaseio.com",
+    "project_id": "tropchoupinou",
+    "storage_bucket": "tropchoupinou.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401599480667:android:06e0bcb94035c6ab07507e",
+        "android_client_info": {
+          "package_name": "helloandroid.m2dl.tropchoupi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401599480667-oj6lhias9kgq07d1bdtmc0q20jofohkn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "helloandroid.m2dl.tropchoupi",
+            "certificate_hash": "b309c968c4f8c1d5f405db493b0da640e78ef17e"
+          }
+        },
+        {
+          "client_id": "401599480667-ih20l8b4ajgmfhcbo6nkrh560ig3gbr9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHFcXQY5NGtEl926qDtwy3ge1_DNBGM90"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401599480667-ih20l8b4ajgmfhcbo6nkrh560ig3gbr9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

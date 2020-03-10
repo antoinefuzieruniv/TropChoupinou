@@ -136,6 +136,13 @@ public class Retouche extends MainActivity implements SensorEventListener {
                 sensorManager.registerListener(Retouche.this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
             }
         });
+
+        findViewById(R.id.upload).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                upload();
+            }
+        });
         getImageFromCameraCapure();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -190,6 +197,13 @@ public class Retouche extends MainActivity implements SensorEventListener {
         ImageView imageView = findViewById(R.id.retoucheImageView);
         imageView.setImageBitmap(bitmap);
     }
+
+    public void upload(){
+        FireBase fireBase = new FireBase();
+        Bitmap bitmap = ((BitmapDrawable)retoucheImageView.getDrawable()).getBitmap();
+        fireBase.uploadPhoto(bitmap);
+    }
+
 
     public void reset(View view) {
         sensorManager.unregisterListener(Retouche.this);
