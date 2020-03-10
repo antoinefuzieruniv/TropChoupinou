@@ -160,6 +160,24 @@ public class Retouche extends MainActivity implements SensorEventListener {
                 return true;
             }
         });
+
+        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                //METS CE QUE TU VEUX LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                return true;
+            }
+        });
+
+        menu.getItem(2).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                reset();
+                return true;
+            }
+        });
+
+
         return true;
     }
 
@@ -206,7 +224,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
     }
 
 
-    public void reset(View view) {
+    public void reset() {
         sensorManager.unregisterListener(Retouche.this);
         retoucheImageView.setImageBitmap(bitmap);
     }
