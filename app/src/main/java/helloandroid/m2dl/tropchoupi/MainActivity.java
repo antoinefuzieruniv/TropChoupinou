@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.Menu;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity  {
     }
 
 
-    public void pickFromGallery(View v) {
+    public void pickFromGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
