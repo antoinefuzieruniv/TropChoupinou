@@ -138,12 +138,6 @@ public class Retouche extends MainActivity implements SensorEventListener {
             }
         });
 
-        findViewById(R.id.upload).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                upload();
-            }
-        });
         getImageFromCameraCapure();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -164,7 +158,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
         menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                //METS CE QUE TU VEUX LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                upload();
                 return true;
             }
         });
