@@ -79,4 +79,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="95dp"
+        android:layout_height="96dp"
+        android:text="Upload"
+        tools:layout_editor_absoluteX="401dp"
+        tools:layout_editor_absoluteY="583dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

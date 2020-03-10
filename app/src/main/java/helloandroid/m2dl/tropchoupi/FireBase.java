@@ -34,14 +34,15 @@ public class FireBase {
 
 
         // 1 - Upload a picture in Firebase and send a message
-        private void uploadPhotoInFirebaseAndSendMessage(Bitmap bitmap) {
+        public void uploadPhoto(Bitmap bitmap) {
             String uuid = UUID.randomUUID().toString(); // GENERATE UNIQUE STRING
             // A - UPLOAD TO GCS
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
             StorageReference mImageRef = FirebaseStorage.getInstance().getReference(uuid);
-            ((StorageReference) mImageRef).putBytes(data).addOnFailureListener(new OnFailureListener() {
+            mImageRef.putBytes(data).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
                     // Handle unsuccessful uploads

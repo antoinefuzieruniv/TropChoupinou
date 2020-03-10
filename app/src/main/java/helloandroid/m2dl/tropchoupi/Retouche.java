@@ -9,6 +9,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -69,6 +70,13 @@ public class Retouche extends AppCompatActivity {
                 changeColorFilter(Color.RED);
             }
         });
+
+        findViewById(R.id.upload).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                upload();
+            }
+        });
         getImageFromCameraCapure();
 
     }
@@ -103,6 +111,12 @@ public class Retouche extends AppCompatActivity {
             ImageView imageView = findViewById(R.id.retoucheImageView);
             imageView.setImageBitmap(bitmap);
 
+    }
+
+    public void upload(){
+        FireBase fireBase = new FireBase();
+        Bitmap bitmap = ((BitmapDrawable)retoucheImageView.getDrawable()).getBitmap();
+        fireBase.uploadPhoto(bitmap);
     }
 
 
