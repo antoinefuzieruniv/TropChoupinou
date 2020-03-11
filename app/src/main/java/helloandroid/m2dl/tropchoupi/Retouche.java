@@ -149,7 +149,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
         getMenuInflater().inflate(R.menu.menu, menu);
 
 
-        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 upload();
@@ -157,7 +157,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
             }
         });
 
-        menu.getItem(2).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 reset();
