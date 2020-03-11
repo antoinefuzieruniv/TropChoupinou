@@ -16,19 +16,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     private int GALLERY_REQUEST_CODE = 200;
 
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState)  {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
 
         findViewById(R.id.take_photo).setOnClickListener(new View.OnClickListener() {
@@ -66,10 +65,10 @@ public class MainActivity extends AppCompatActivity  {
                 Uri selectedImage = null;
                 if (data != null) {
                     selectedImage = data.getData();
-                }else{
+                } else {
                     return;
                 }
-                String path = getRealPathFromURI_API19(this,selectedImage);
+                String path = getRealPathFromURI_API19(this, selectedImage);
 
                 Intent in1 = new Intent(this, Retouche.class);
                 in1.putExtra("image", path);
@@ -81,20 +80,20 @@ public class MainActivity extends AppCompatActivity  {
         }
     }
 
-    private static String getRealPathFromURI_API19(Context context, Uri uri){
+    private static String getRealPathFromURI_API19(Context context, Uri uri) {
         String filePath = "";
         String wholeID = DocumentsContract.getDocumentId(uri);
 
         // Split at colon, use second item in the array
         String id = wholeID.split(":")[1];
 
-        String[] column = { MediaStore.Images.Media.DATA };
+        String[] column = {MediaStore.Images.Media.DATA};
 
         // where id is equal to
         String sel = MediaStore.Images.Media._ID + "=?";
 
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                column, sel, new String[]{ id }, null);
+                column, sel, new String[]{id}, null);
 
         int columnIndex = cursor.getColumnIndex(column[0]);
 
