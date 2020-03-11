@@ -214,7 +214,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
     public void upload(){
         FireBase fireBase = new FireBase();
         Bitmap bitmap = ((BitmapDrawable)retoucheImageView.getDrawable()).getBitmap();
-        fireBase.uploadPhoto(bitmap);
+        fireBase.uploadPhoto(bitmap, 70 , 70);
     }
 
 

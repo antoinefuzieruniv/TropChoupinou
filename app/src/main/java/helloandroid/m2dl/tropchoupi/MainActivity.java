@@ -39,6 +39,14 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
+        findViewById(R.id.goMap).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         findViewById(R.id.choose_photo).setOnClickListener(new View.OnClickListener() {
             @Override
