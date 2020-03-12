@@ -5,9 +5,10 @@ import android.graphics.BitmapFactory;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
@@ -17,17 +18,17 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class FireBase {
+public class FireBase{
 
-    private HashMap<String,Bitmap> listPhotos;
-    Task<ListResult> results ;
+    public HashMap<String,Bitmap> listPhotos;
+    MapsActivity mapsActivity;
 
     public HashMap<String, Bitmap> getListPhotos() {
         return listPhotos;
     }
 
-    public FireBase() {
-        listPhotos = new HashMap<>();
+    public FireBase(MapsActivity mapsActivity) {
+        this.mapsActivity = mapsActivity;
     }
 
     // --------------------
@@ -44,7 +45,7 @@ public class FireBase {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
             StorageReference mImageRef = FirebaseStorage.getInstance().getReference("image")
-                    .child(uuid+"lat{" + latitude + "}long{" + longitutde + "}");
+                    .child(uuid+"#" + latitude + "#" + longitutde );
             mImageRef.putBytes(data).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
@@ -53,17 +54,16 @@ public class FireBase {
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                    // ...
-                    getAllPhotos();
+
                 }
             });
 
         }
 
-        public void getAllPhotos(){
+        public void getAllPhotos() {
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference listRef = storage.getReference("image");
+            listPhotos = new HashMap<>();
 
             listRef.listAll()
                     .addOnSuccessListener(new OnSuccessListener<ListResult>() {
@@ -77,9 +77,16 @@ public class FireBase {
                                 item.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                     @Override
                                     public void onSuccess(byte[] bytes) {
-                                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                        final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                                         listPhotos.put(nameItem,bitmap);
-
+                                        /**************************************/
+                                        mapsActivity.runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                mapsActivity.putOneMarker(recupCoord(nameItem),bitmap);
+                                                mapsActivity.onMapReady(mapsActivity.mGoogleMap);
+                                            }
+                                        });
+                                        /**************************************/
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -99,9 +106,13 @@ public class FireBase {
                             // Uh-oh, an error occurred!
                         }
                     });
+
         }
 
-
+    public LatLng recupCoord(String str){
+        String[] split = str.split("#");
+        return new LatLng(Double.parseDouble(split[1]),Double.parseDouble(split[2]));
+    }
 
 
 }
