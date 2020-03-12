@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class FireBase{
 
-    MapsActivity mapsActivity;
+    private MapsActivity mapsActivity;
     public FireBase(MapsActivity mapsActivity) {
         this.mapsActivity = mapsActivity;
     }
