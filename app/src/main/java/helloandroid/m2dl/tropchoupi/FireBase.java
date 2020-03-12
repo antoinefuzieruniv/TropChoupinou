@@ -20,13 +20,7 @@ import java.util.UUID;
 
 public class FireBase{
 
-    public HashMap<String,Bitmap> listPhotos;
     MapsActivity mapsActivity;
-
-    public HashMap<String, Bitmap> getListPhotos() {
-        return listPhotos;
-    }
-
     public FireBase(MapsActivity mapsActivity) {
         this.mapsActivity = mapsActivity;
     }
@@ -63,7 +57,6 @@ public class FireBase{
         public void getAllPhotos() {
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference listRef = storage.getReference("image");
-            listPhotos = new HashMap<>();
 
             listRef.listAll()
                     .addOnSuccessListener(new OnSuccessListener<ListResult>() {
@@ -78,11 +71,10 @@ public class FireBase{
                                     @Override
                                     public void onSuccess(byte[] bytes) {
                                         final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                        listPhotos.put(nameItem,bitmap);
                                         /**************************************/
                                         mapsActivity.runOnUiThread(new Runnable() {
                                             public void run() {
-                                                mapsActivity.putOneMarker(recupCoord(nameItem),bitmap);
+                                                mapsActivity.putOneMarker(recupCoord(nameItem),Bitmap.createScaledBitmap(bitmap,300,300,true));
                                                 mapsActivity.onMapReady(mapsActivity.mGoogleMap);
                                             }
                                         });

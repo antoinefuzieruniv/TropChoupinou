@@ -55,8 +55,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //new DownloadFilesTask(this).execute(0, 0, 0);
         fireBase.getAllPhotos();
         markerList = new HashMap<>();
         listM = new ArrayList<>();
@@ -65,18 +63,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
-        /* TO DELETE */
-/*        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow),69,69);
-
- */
-/*        LatLng latLng = new LatLng(40, 40);
-        LatLng latLng1 = new LatLng(50, 50);
-        LatLng latLng2 = new LatLng(55, 55);
-
-        markerList.put(latLng, BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow));
-        markerList.put(latLng1,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2));
-        markerList.put(latLng2,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3));*/
-        /* ********* */
     }
 
     @Override
@@ -115,6 +101,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     previousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(markerList.get(marker.getPosition())));
+
                 previousMarker = marker;
                 currentMarker = marker;
                 return true;
