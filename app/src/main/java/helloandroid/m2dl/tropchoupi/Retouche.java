@@ -13,11 +13,11 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.DragEvent;
@@ -27,9 +27,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
+import java.util.List;
 
 public class Retouche extends MainActivity implements SensorEventListener {
     ImageView retoucheImageView;
@@ -41,6 +48,9 @@ public class Retouche extends MainActivity implements SensorEventListener {
     private ImageView toDrag;
     private String TAG;
     private int GALLERY_REQUEST_CODE = 200;
+    private ConstraintLayout constraintLayoutImageView;
+    private Location lastKnownLocation;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -48,14 +58,24 @@ public class Retouche extends MainActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_retouche);
 
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            lastKnownLocation = location;
+                        }
+                    }
+                });
         this.useLightSensor = findViewById(R.id.useLightSensor);
         this.retoucheImageView = findViewById(R.id.retoucheImageView);
         this.toDrag = findViewById(R.id.toDrag);
-
+        this.constraintLayoutImageView = findViewById(R.id.constraintLayoutImageView);
 
         toDrag.setOnLongClickListener(new MyOnLongClickListener());
-
-
 
 
         toDrag.setOnTouchListener(new View.OnTouchListener() {
@@ -70,7 +90,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
             }
         });
 
-        retoucheImageView.setOnDragListener(new View.OnDragListener() {
+        findViewById(R.id.retoucheLayout).setOnDragListener(new View.OnDragListener() {
 
             float startX = 0f;
             float startY = 0f;
@@ -96,24 +116,27 @@ public class Retouche extends MainActivity implements SensorEventListener {
                         Log.d(TAG, "onDrag: ACTION_DRAG_DROP ");
 
 
-                        float x = event.getX() - (view.getWidth() / 2f);
-                        float y = event.getY() - (view.getHeight() / 2f);
-
+                        float x = event.getX();
+                        float y = event.getY();
+                        Canvas canvas = new Canvas(bitmap);
+                        Paint paint = new Paint();
+                        paint.setARGB(255, 255, 0, 0);
+                        canvas.drawPoint(x, y, paint);
                         view.setX(x);
 
-                        if ((y + view.getHeight()) > retoucheImageView.getHeight()) {
-                            view.setY(retoucheImageView.getHeight() - view.getHeight());
-                        } else {
-                            view.setY(y);
-                        }
+//                        if ((y + view.getHeight()) > retoucheImageView.getHeight()) {
+//                            view.setY(retoucheImageView.getHeight() - view.getHeight());
+//                        } else {
+                        view.setY(y);
+                        //}
                         view.setVisibility(View.VISIBLE);
                         break;
                     case DragEvent.ACTION_DRAG_ENDED:
-                        if (!event.getResult()) {
-                            view.setX(startX);
-                            view.setY(startY);
-                            view.setVisibility(View.VISIBLE);
-                        }
+//                        if (!event.getResult()) {
+//                            view.setX(startX);
+//                            view.setY(startY);
+//                            view.setVisibility(View.VISIBLE);
+//                        }
                         Log.d(TAG, "onDrag: ACTION_DRAG_ENDED ");
                     default:
                         break;
@@ -139,9 +162,22 @@ public class Retouche extends MainActivity implements SensorEventListener {
         });
 
         getImageFromCameraCapure();
+        bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+
+
+    }
+
+    private void upload() {
+        FireBase fireBase = new FireBase();
+
+        constraintLayoutImageView.setDrawingCacheEnabled(true);
+        constraintLayoutImageView.buildDrawingCache();
+        Bitmap bitmap = constraintLayoutImageView.getDrawingCache();
+
+        fireBase.uploadPhoto(bitmap, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
     }
 
     @Override
@@ -149,15 +185,17 @@ public class Retouche extends MainActivity implements SensorEventListener {
         getMenuInflater().inflate(R.menu.menu, menu);
 
 
-        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.getItem(0).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 upload();
+                Intent in1 = new Intent(Retouche.this, MapsActivity.class);
+                startActivity(in1);
                 return true;
             }
         });
 
-        menu.getItem(2).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.getItem(1).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 reset();
@@ -175,6 +213,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
     }
 
     private void changeColorFilter(int color) {
+        sensorManager.unregisterListener(this);
         Bitmap bmpMonochrome = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmpMonochrome);
         ColorMatrix ma = new ColorMatrix();
@@ -183,9 +222,11 @@ public class Retouche extends MainActivity implements SensorEventListener {
         paint.setColorFilter(filter);
         canvas.drawBitmap(bitmap, 0, 0, paint);
         retoucheImageView.setImageBitmap(bmpMonochrome);
+        sensorManager.registerListener(Retouche.this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void changeSaturation(float saturation) {
+        sensorManager.unregisterListener(this);
         Bitmap bmpMonochrome = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmpMonochrome);
         ColorMatrix ma = new ColorMatrix();
@@ -205,13 +246,6 @@ public class Retouche extends MainActivity implements SensorEventListener {
         imageView.setImageBitmap(bitmap);
     }
 
-    public void upload(){
-        FireBase fireBase = new FireBase(null);
-        Bitmap bitmap = ((BitmapDrawable)retoucheImageView.getDrawable()).getBitmap();
-        fireBase.uploadPhoto(bitmap, 70 , 70);
-    }
-
-
     public void reset() {
         sensorManager.unregisterListener(Retouche.this);
         retoucheImageView.setImageBitmap(bitmap);
@@ -219,6 +253,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 float x = event.values[0];
@@ -232,13 +267,17 @@ public class Retouche extends MainActivity implements SensorEventListener {
                 } else {
                     changeColorFilter(Color.MAGENTA);
                 }
+
                 break;
             case Sensor.TYPE_LIGHT:
+                System.out.println(event.values[0]);
                 changeSaturation(event.values[0]);
                 break;
             default:
                 break;
         }
+
+
     }
 
     @Override
@@ -252,7 +291,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), GALLERY_REQUEST_CODE);
     }
 
-    public class MyOnLongClickListener implements View.OnLongClickListener{
+    public class MyOnLongClickListener implements View.OnLongClickListener {
 
         @Override
         public boolean onLongClick(View v) {
