@@ -1,16 +1,24 @@
 package helloandroid.m2dl.tropchoupi;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -30,6 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,43 +46,57 @@ import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private GoogleMap mGoogleMap;
+    public GoogleMap mGoogleMap;
     private SupportMapFragment mapFrag;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
     private Marker mCurrLocationMarker;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Map<LatLng,Bitmap> markerList;
+    private Map<LatLng, Bitmap> markerList;
     private ArrayList<MarkerOptions> listM;
     private Marker currentMarker;
     private Marker previousMarker = null;
-    private FireBase fireBase = new FireBase();
+    private FireBase fireBase = new FireBase(this);
     private HashMap<String, Bitmap> listPhotos;
+    private int GALLERY_REQUEST_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+        }, 1);
+
+        fireBase.getAllPhotos();
         markerList = new HashMap<>();
         listM = new ArrayList<>();
-        fireBase.getAllPhotos();
-        listPhotos = fireBase.getListPhotos();
+        setContentView(R.layout.activity_maps);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
-        /* TO DELETE */
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow),69,69);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2),96,96);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3),40,40);
-        LatLng latLng = new LatLng(40, 40);
-        LatLng latLng1 = new LatLng(50, 50);
-        LatLng latLng2 = new LatLng(55, 55);
 
-        markerList.put(latLng, BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow));
-        markerList.put(latLng1,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2));
-        markerList.put(latLng2,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3));
-        /* ********* */
+        findViewById(R.id.take_photo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, Camera.class);
+                startActivityForResult(intent, 200);
+            }
+        });
+
+
+        findViewById(R.id.choose_photo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickFromGallery();
+            }
+        });
+
+
     }
 
     @Override
@@ -95,7 +118,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationRequest.setFastestInterval(120000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-
+        mGoogleMap.setMyLocationEnabled(true);
         createAndPutMarkerOnMap(markerList);
         createListeners();
     }
@@ -103,7 +126,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Function to create an event when a click on marker or in the map is detected
      */
-    public void createListeners(){
+    public void createListeners() {
         mGoogleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
             @Override
@@ -112,6 +135,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     previousMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 }
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(markerList.get(marker.getPosition())));
+
                 previousMarker = marker;
                 currentMarker = marker;
                 return true;
@@ -120,9 +144,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMapClick(LatLng arg0)
-            {
-                if(currentMarker!=null) {
+            public void onMapClick(LatLng arg0) {
+                if (currentMarker != null) {
                     MarkerOptions my = new MarkerOptions();
                     my.position(currentMarker.getPosition());
                     my.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -137,10 +160,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * To create markers and put them on the map
+     *
      * @param markers list of the markers, we get them all in the firebase
      */
-    public void createAndPutMarkerOnMap(Map<LatLng,Bitmap> markers){
-        for (Map.Entry<LatLng,Bitmap> marker : markers.entrySet()){
+    public void createAndPutMarkerOnMap(Map<LatLng, Bitmap> markers) {
+        for (Map.Entry<LatLng, Bitmap> marker : markers.entrySet()) {
             MarkerOptions m = new MarkerOptions();
             m.position(marker.getKey());
             m.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
@@ -148,6 +172,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mGoogleMap.addMarker(m);
         }
     }
+
+    public void putOneMarker(LatLng latLng, Bitmap bitmap) {
+
+        MarkerOptions m = new MarkerOptions();
+        m.position(latLng);
+        m.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        markerList.put(latLng, bitmap);
+
+    }
+
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -161,7 +195,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (mCurrLocationMarker != null) {
                     mCurrLocationMarker.remove();
                 }
-                LatLng latLng = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+                LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
             }
 
@@ -169,9 +203,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
 
-
-
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -186,12 +219,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 //Prompt the user once explanation has been shown
                                 ActivityCompat.requestPermissions(MapsActivity.this,
                                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_LOCATION ); }}).create().show();
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        }).create().show();
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION );
+                        MY_PERMISSIONS_REQUEST_LOCATION);
             }
         }
     }
@@ -215,5 +250,61 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return;
             }
         }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 200:
+                Uri selectedImage = null;
+                if (data != null) {
+                    selectedImage = data.getData();
+                } else {
+                    return;
+                }
+                String path = getRealPathFromURI_API19(this, selectedImage);
+
+                Intent in1 = new Intent(this, Retouche.class);
+                in1.putExtra("image", path);
+                startActivity(in1);
+
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + requestCode);
+        }
+    }
+
+    private static String getRealPathFromURI_API19(Context context, Uri uri) {
+        String filePath = "";
+        String wholeID = DocumentsContract.getDocumentId(uri);
+
+        // Split at colon, use second item in the array
+        String id = wholeID.split(":")[1];
+
+        String[] column = {MediaStore.Images.Media.DATA};
+
+        // where id is equal to
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                column, sel, new String[]{id}, null);
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+        cursor.close();
+        return filePath;
+    }
+
+
+    public void pickFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), GALLERY_REQUEST_CODE);
     }
 }
