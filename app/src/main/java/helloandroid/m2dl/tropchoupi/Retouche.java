@@ -30,10 +30,13 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.xiaopo.flying.sticker.BitmapStickerIcon;
+import com.xiaopo.flying.sticker.StickerView;
 
 import java.io.File;
 
@@ -45,14 +48,13 @@ public class Retouche extends AppCompatActivity implements SensorEventListener {
     private Sensor accelerometerSensor;
     private Sensor lightSensor;
     private Location lastKnownLocation;
-    Canvas canvas;
-
+    private StickerView stickerView;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_retouche);
-
+        stickerView = findViewById(R.id.sticker_view);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         fusedLocationClient.getLastLocation()
@@ -86,13 +88,12 @@ public class Retouche extends AppCompatActivity implements SensorEventListener {
 
 
         getImageFromCameraCapure();
+
+
         bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-
-
-        canvas = new Canvas(bitmap);
     }
 
     private void upload() {
@@ -173,7 +174,7 @@ public class Retouche extends AppCompatActivity implements SensorEventListener {
     }
 
     public void reset() {
-        canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        stickerView.removeAllStickers();
         sensorManager.unregisterListener(Retouche.this);
         retoucheImageView.setImageBitmap(bitmap);
     }
@@ -211,5 +212,17 @@ public class Retouche extends AppCompatActivity implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    public void onStickClick(View v){
+        ImageView imageView = (ImageView)v;
+        final BitmapStickerIcon test = new BitmapStickerIcon(imageView.getDrawable(), BitmapStickerIcon.LEFT_TOP);
 
+        v.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                stickerView.remove(test);
+                return true;
+            }
+        });
+        stickerView.addSticker(test);
+    }
 }
