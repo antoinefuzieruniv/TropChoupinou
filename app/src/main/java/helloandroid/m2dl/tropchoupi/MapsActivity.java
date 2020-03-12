@@ -63,9 +63,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag.getMapAsync(this);
 
         /* TO DELETE */
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow),69,69);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2),96,96);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3),40,40);
+
         LatLng latLng = new LatLng(40, 40);
         LatLng latLng1 = new LatLng(50, 50);
         LatLng latLng2 = new LatLng(55, 55);

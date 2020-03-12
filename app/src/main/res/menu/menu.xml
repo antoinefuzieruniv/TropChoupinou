@@ -1,8 +1,8 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/sauvegarder"
-        android:title="Sauvegarder"
+        android:id="@+id/partager"
+        android:title="Partager"
         app:showAsAction="always"></item>
     <item
         android:id="@+id/reset"

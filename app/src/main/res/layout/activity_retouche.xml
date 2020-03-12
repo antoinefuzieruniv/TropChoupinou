@@ -38,6 +38,12 @@
                 android:layout_weight="1"
                 app:srcCompat="@android:color/holo_blue_dark" />
 
+            <ImageView
+                android:id="@+id/toDrag"
+                android:layout_width="121dp"
+                android:layout_height="121dp"
+                app:srcCompat="@drawable/ic_gallery" />
+
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -59,20 +65,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/avatars" />
-
-        <ImageView
-            android:id="@+id/toDrag"
-            android:layout_width="121dp"
-            android:layout_height="121dp"
-            android:layout_marginStart="72dp"
-            android:layout_marginTop="232dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/retoucheImageView"
-            app:layout_constraintHorizontal_bias="0.422"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/retoucheImageView"
-            app:layout_constraintVertical_bias="0.057"
-            app:srcCompat="@drawable/ic_gallery" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
