@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.ListResult;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,7 +44,7 @@ import java.util.Set;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private GoogleMap mGoogleMap;
+    public GoogleMap mGoogleMap;
     private SupportMapFragment mapFrag;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
@@ -53,36 +54,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<MarkerOptions> listM;
     private Marker currentMarker;
     private Marker previousMarker = null;
-    private FireBase fireBase = new FireBase();
+    private FireBase fireBase = new FireBase(this);
     private HashMap<String, Bitmap> listPhotos;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
 
+        //new DownloadFilesTask(this).execute(0, 0, 0);
+        fireBase.getAllPhotos();
         markerList = new HashMap<>();
         listM = new ArrayList<>();
-        fireBase.getAllPhotos();
-        listPhotos = fireBase.getListPhotos();
         setContentView(R.layout.activity_maps);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
 
         /* TO DELETE */
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow),69,69);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2),96,96);
-        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3),40,40);
-        LatLng latLng = new LatLng(40, 40);
+/*        fireBase.uploadPhoto(BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow),69,69);
+
+ */
+/*        LatLng latLng = new LatLng(40, 40);
         LatLng latLng1 = new LatLng(50, 50);
         LatLng latLng2 = new LatLng(55, 55);
 
         markerList.put(latLng, BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow));
         markerList.put(latLng1,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow2));
-        markerList.put(latLng2,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3));
+        markerList.put(latLng2,BitmapFactory.decodeResource(this.getResources(), R.drawable.arrow3));*/
         /* ********* */
 
 
@@ -167,6 +166,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mGoogleMap.addMarker(m);
         }
     }
+
+    public void putOneMarker(LatLng latLng,Bitmap bitmap){
+
+            MarkerOptions m = new MarkerOptions();
+            m.position(latLng);
+            m.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            markerList.put(latLng, bitmap);
+
+    }
+
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
