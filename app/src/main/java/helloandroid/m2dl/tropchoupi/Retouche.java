@@ -171,7 +171,7 @@ public class Retouche extends MainActivity implements SensorEventListener {
     }
 
     private void upload() {
-        FireBase fireBase = new FireBase();
+        FireBase fireBase = new FireBase(null);
 
         constraintLayoutImageView.setDrawingCacheEnabled(true);
         constraintLayoutImageView.buildDrawingCache();

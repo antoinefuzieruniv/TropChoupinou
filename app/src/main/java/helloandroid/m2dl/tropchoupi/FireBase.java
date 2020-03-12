@@ -37,7 +37,7 @@ public class FireBase{
 
 
         // 1 - Upload a picture in Firebase and send a message
-        public void uploadPhoto(Bitmap bitmap,int latitude,int longitutde) {
+        public void uploadPhoto(Bitmap bitmap,double latitude,double longitutde) {
             String uuid = UUID.randomUUID().toString(); // GENERATE UNIQUE STRING
             // A - UPLOAD TO GCS
 
